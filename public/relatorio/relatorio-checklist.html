@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Checklist de Compras</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 40px;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: start;
+      gap: 16px;
+      margin-bottom: 10px;
+    }
+    .header img {
+      width: 100px;
+      height: auto;
+    }
+    .info-text {
+      font-size: 14px;
+      line-height: 1.5;
+      border: 1px solid black;
+      padding: 10px;
+    }
+    .bold {
+      font-weight: bold;
+    }
+    .linha-topo {
+  display: flex;
+  justify-content: center; /* ← centraliza horizontalmente */
+  gap: 40px; /* espaço entre os itens */
+  font-size: 15px;
+  margin-top: 20px;
+  margin-bottom: 30px;
+    }
+    .campos-identificacao {
+      font-size: 15px;
+      margin-bottom: 30px;
+    }
+    .campos-identificacao div {
+      margin-bottom: 12px;
+    }
+    .linha {
+      display: inline-block;
+      border-bottom: 1px solid black;
+      width: 80%;
+      margin-left: 10px;
+      padding-bottom: 2px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+    td, th {
+      border: 1px solid black;
+      padding: 4px 6px;
+    }
+    .checklist-item {
+      margin: 2px 0;
+    }
+    .full-line {
+      border-bottom: 1px solid black;
+      height: 20px;
+      margin-top: 4px;
+      margin-bottom: 4px;
+    }
+    @media print {
+      .no-print {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <img src="../brasao.png" alt="Brasão" />
+  <div class="info-text">
+    <strong style="font-size: 16px; display: block; text-align: center;">PREFEITURA MUNICIPAL DE TUPI PAULISTA</strong>
+    <div style="display: flex; justify-content: space-between;">
+      <span>R. Júlio Cantadori, 405 - Centro, Tupi Paulista - SP, 17930-000</span>
+    </div>
+    <div style="display: flex; justify-content: space-between;">
+      <span>Telefone: (18)3851-9000</span>
+      <span>E-mail: tupicompras@gmail.com</span>
+    </div>
+    <div style="text-align: center; margin-top: 10px;">
+      <strong>Departamento de Compras</strong><br />
+      Check List
+    </div>
+  </div>
+</div>
+
+<div id="ataRegistro" style="text-align:right; margin-top: 4px;"></div>
+
+<!-- Linha topo ajustada -->
+<div class="linha-topo">
+  <div id="campoTipoCompra"></div>
+  <div id="campoTipoCompra2"></div>
+  <div id="campoTipoCompra3"></div>
+</div>
+
+<div class="campos-identificacao">
+  <div><strong>Setor:</strong> <span class="linha" id="setor"></span></div>
+  <div><strong>Fornecedor:</strong> <span class="linha" id="fornecedor"></span></div>
+  <div><strong>OBJ .:</strong> <span class="linha" id="obj"></span></div>
+</div>
+
+<div style="margin-top: 16px">
+  <div class="bold">Checklist:</div>
+  <div id="checklistContainer"></div>
+</div>
+
+<div style="margin-top: 16px">
+  <div class="bold">Pedidos:</div>
+  <div id="resumoPedidos" class="full-line"></div>
+  <div class="bold" style="margin-top: 8px;">NFs:</div>
+  <div id="resumoNFs" class="full-line"></div>
+</div>
+
+<div style="margin-top: 30px">
+  <div><span class="bold">Notificações:</span> 1ª ____/____/______ &nbsp;&nbsp; 2ª ____/____/______ &nbsp;&nbsp; 3ª ____/____/______</div>
+  <div class="bold" style="margin-top: 18px;">Obs.:</div>
+  <div class="full-line"></div>
+  <div class="full-line"></div>
+  <div class="full-line"></div>
+</div>
+
+<div style="margin-top: 30px">
+  <div class="bold">CONTROLE DE REGULARIDADE FISCAL:</div>
+  <table>
+    <tr>
+      <td class="bold">PEDIDO ATRELADO:</td>
+      <td id="pedidoAtrelado" colspan="3"></td>
+      <td class="bold">PARCIAL:</td>
+      <td id="parcialAtrelado" colspan="3"></td>
+    </tr>
+    <tr>
+      <td class="bold">CARTÃO CNPJ:</td>
+      <td class="bold">Emissão:</td>
+      <td colspan="6" id="cnpjEmissao"></td>
+    </tr>
+    <tr>
+      <td class="bold">ESTADUAL:</td>
+      <td class="bold">EMISSÃO:</td>
+      <td id="estadualEmissao"></td>
+      <td class="bold">VALIDADE:</td>
+      <td id="estadualValidade"></td>
+      <td colspan="3"></td>
+    </tr>
+    <tr>
+      <td class="bold">TRABALHISTA:</td>
+      <td class="bold">EMISSÃO:</td>
+      <td id="trabalhistaEmissao"></td>
+      <td class="bold">VALIDADE:</td>
+      <td id="trabalhistaValidade"></td>
+      <td colspan="3"></td>
+    </tr>
+    <tr>
+      <td class="bold">FEDERAL:</td>
+      <td class="bold">EMISSÃO:</td>
+      <td id="federalEmissao"></td>
+      <td class="bold">VALIDADE:</td>
+      <td id="federalValidade"></td>
+      <td colspan="3"></td>
+    </tr>
+    <tr>
+      <td class="bold">FGTS:</td>
+      <td class="bold">EMISSÃO:</td>
+      <td id="fgtsEmissao"></td>
+      <td class="bold">VALIDADE:</td>
+      <td id="fgtsValidade"></td>
+      <td colspan="3"></td>
+    </tr>
+  </table>
+</div>
+
+<script>
+  const dados = JSON.parse(localStorage.getItem("dadosChecklist") || "{}");
+
+  if (dados.ata) {
+    document.getElementById("ataRegistro").textContent = "(X) Ata de Registro";
+  }
+
+  const el = (id, val) => document.getElementById(id).textContent = val || "";
+
+  const linhaTopo = document.querySelector(".linha-topo");
+  linhaTopo.innerHTML = "";
+
+  const tipo = dados.tipoCompra || "";
+  const camposObj = dados.camposTipoCompra || {};
+
+  linhaTopo.innerHTML += `<div><strong>${tipo}</strong></div>`;
+
+  Object.entries(camposObj).forEach(([label, valor]) => {
+    if (valor && valor.trim()) {
+      linhaTopo.innerHTML += `<div><strong>${label}:</strong> ${valor}</div>`;
+    }
+  });
+
+  el("fornecedor", dados.fornecedor);
+  el("setor", dados.setor);
+  el("obj", dados.obj);
+
+  el("pedidoAtrelado", dados.pedidoAtrelado || "");
+  el("parcialAtrelado", dados.parcialAtrelado || "");
+
+  const resumoPedidos = (dados.inputsExtras || [])
+    .map(p => `${p.pedido || ""}/${p.parcial || ""}`)
+    .join("        ");
+  el("resumoPedidos", resumoPedidos);
+
+  const resumoNFs = (dados.inputsExtras || [])
+    .map(p => p.nf || "")
+    .filter(nf => nf)
+    .join("        ");
+  el("resumoNFs", resumoNFs);
+
+  const cert = dados.camposExtras || [];
+  const certSafe = (idx) => cert[idx] || "";
+  el("cnpjEmissao", certSafe(0));
+  el("estadualEmissao", certSafe(1));
+  el("estadualValidade", certSafe(2));
+  el("trabalhistaEmissao", certSafe(3));
+  el("trabalhistaValidade", certSafe(4));
+  el("federalEmissao", certSafe(5));
+  el("federalValidade", certSafe(6));
+  el("fgtsEmissao", certSafe(7));
+  el("fgtsValidade", certSafe(8));
+
+  const checklistContainer = document.getElementById("checklistContainer");
+  (dados.checksMarcados || []).forEach(txt => {
+    const div = document.createElement("div");
+    div.className = "checklist-item";
+    div.textContent = `(X) ${txt}`;
+    checklistContainer.appendChild(div);
+  });
+
+  window.onload = () => window.print();
+</script>
+</body>
+</html>

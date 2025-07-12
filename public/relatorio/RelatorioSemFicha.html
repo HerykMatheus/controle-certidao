@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Notas - Sem Ficha</title>
+  <style>
+    body { font-family: Arial, sans-serif; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid black; padding: 6px; text-align: left; }
+    @media print { .no-print { display: none; } }
+  </style>
+</head>
+<body>
+  <h1>Notas - Sem Ficha</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Fornecedor</th>
+        <th>Pedido</th>
+        <th>Parcial</th>
+        <th>NF</th>
+        <th>Data Contabilidade</th>
+        <th>Assinatura</th>
+      </tr>
+    </thead>
+    <tbody id="dados-tabela"></tbody>
+  </table>
+
+<script>
+  const formatarData = (raw) => {
+    if (!raw) return "";
+    const timestamp =
+      typeof raw === "object" && raw.$date?.$numberLong
+        ? parseInt(raw.$date.$numberLong)
+        : raw;
+    const d = new Date(timestamp);
+    return !isNaN(d) ? d.toLocaleDateString("pt-BR") : "";
+  };
+
+  const dados = JSON.parse(localStorage.getItem("dadosRelatorio") || "[]");
+  const tbody = document.getElementById("dados-tabela");
+
+  dados.forEach(nota => {
+    const linha = document.createElement("tr");
+    linha.innerHTML = `
+      <td>${nota.fornecedor}</td>
+      <td>${nota.pedido}</td>
+      <td>${nota.parcial}</td>
+      <td>${Number(nota.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
+      <td>${formatarData(nota.data_contabilidade)}</td>
+      <td></td>
+    `;
+    tbody.appendChild(linha);
+  });
+
+  window.onload = () => window.print();
+</script>
+</body>
+</html>

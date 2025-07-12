@@ -1,0 +1,57 @@
+[package]
+name = "app"
+version = "0.1.0"
+description = "A Tauri App"
+authors = ["you"]
+license = ""
+repository = ""
+edition = "2021"
+rust-version = "1.77.2"
+
+[lib]
+name = "app_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.3.0", features = [] }
+
+[dependencies]
+# Tauri
+tauri = { version = "2.6.2", features = [] }
+tauri-plugin-log = "2"
+tauri-plugin-oauth = "2.0.0"
+
+# MongoDB e BSON
+mongodb = "3.2.4"
+bson = { version = "2.8", features = ["chrono-0_4"] }
+
+# Assíncrono
+tokio = { version = "1", features = ["full"] }
+futures = "0.3.31"
+
+# Serde e datas
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.140"
+chrono = { version = "0.4.41", features = ["serde"] }
+
+# Google Drive + OAuth compatíveis
+google-drive3 = "3.1.0+20220225"
+yup-oauth2 = "12.1.0"
+hyper = { version = "0.14.0", features = ["client", "tcp"] }
+hyper-rustls = "0.27.7"
+mime = "0.3.17"
+mime_guess = "2.0.5"
+
+# HTTP extra
+reqwest = { version = "0.12.22", features = ["json", "multipart", "blocking", "stream"] }
+oauth2 = "5.0.0"
+jsonwebtoken = "9.3.1"
+
+# Outros
+regex = "1.11.1"
+tempfile = "3.20.0"
+anyhow = "1.0.98"
+base64 = "0.22.1"
+log = "0.4.27"
+dotenvy = "0.15"
+dotenv = "0.15"
