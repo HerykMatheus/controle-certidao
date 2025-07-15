@@ -1,104 +1,53 @@
+// src/Home.js
 import React, { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import TabelaCertidoes from "../components/TabelaCertidoes";
+import CalendarioAgenda from "../components/CalendarioAgenda";
+
+function getSaudacao() {
+  const hora = new Date().getHours();
+  if (hora < 12) return "Bom dia";
+  if (hora < 18) return "Boa tarde";
+  return "Boa noite";
+}
 
 export default function Home() {
   const [certidoes, setCertidoes] = useState([]);
-
-  async function fetchData() {
-    try {
-      const resultado = await invoke("listar_certidoes_a_vencer_em_30_dias");
-      console.log("Resultado do Tauri:", resultado);
-      setCertidoes(resultado);
-    } catch (err) {
-      console.error("Erro ao buscar certidões:", err);
-    }
-  }
+  const [usuario, setUsuario] = useState("");
 
   useEffect(() => {
+    const nomeSalvo = localStorage.getItem("nomeUsuario");
+    if (!nomeSalvo) {
+      const nome = prompt("Bem-vindo! Por favor, digite seu nome:");
+      if (nome) {
+        localStorage.setItem("nomeUsuario", nome);
+        setUsuario(nome);
+      }
+    } else {
+      setUsuario(nomeSalvo);
+    }
+
+    async function fetchData() {
+      try {
+        const resultado = await invoke("listar_certidoes_a_vencer_em_30_dias");
+        setCertidoes(resultado);
+      } catch (err) {
+        console.error("Erro ao buscar certidões:", err);
+      }
+    }
+
     fetchData();
   }, []);
 
-  // Transforma CertidaoCompleta em várias linhas por tipo de vencimento
-  const linhas = certidoes.flatMap((c) => {
-    const tipos = [
-      { tipo: "Estadual", data: c.vencimento_estadual },
-      { tipo: "Federal", data: c.vencimento_federal },
-      { tipo: "Trabalhista", data: c.vencimento_trabalhista },
-      { tipo: "FGTS", data: c.vencimento_fgts },
-    ];
-
-    const hoje = new Date();
-    const trintaDias = new Date();
-    trintaDias.setDate(hoje.getDate() + 30);
-
-    return tipos
-      .filter((t) => t.data)
-      .map((t) => {
-        const raw = t.data;
-        const vencimentoStr =
-          typeof raw === "object" && raw?.$date ? raw.$date : raw;
-
-       const vencimento = new Date(vencimentoStr);
-vencimento.setMinutes(vencimento.getMinutes() + vencimento.getTimezoneOffset());
-
-        return {
-          fornecedor: c.fornecedor?.replace(",", "") || "Desconhecido",
-          tipo: t.tipo,
-          vencimento,
-        };
-      })
-      .filter(
-        (linha) =>
-          linha.vencimento >= hoje && linha.vencimento <= trintaDias
-      );
-  });
-
-  // Ordena por data mais próxima
-  const linhasOrdenadas = linhas.sort((a, b) => a.vencimento - b.vencimento);
-
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold text-gray-700 mb-4">
-        Certidões Próximas do Vencimento
-      </h1>
+    <div className="h-screen flex flex-col p-4 gap-4 bg-gray-50 overflow-hidden">
+      <h2 className="text-2xl font-semibold text-gray-700">
+        {getSaudacao()}, {usuario}!
+      </h2>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="px-4 py-2 border">Fornecedor</th>
-              <th className="px-4 py-2 border">Tipo</th>
-              <th className="px-4 py-2 border">Vencimento</th>
-            </tr>
-          </thead>
-          <tbody>
-            {linhasOrdenadas.length === 0 ? (
-              <tr>
-                <td colSpan="3" className="text-center p-4 text-gray-500">
-                  Nenhuma certidão próxima do vencimento.
-                </td>
-              </tr>
-            ) : (
-              linhasOrdenadas.map((linha, idx) => {
-                const vencida = linha.vencimento < new Date();
-
-                return (
-                  <tr key={idx}>
-                    <td className="border px-4 py-2">{linha.fornecedor}</td>
-                    <td className="border px-4 py-2">{linha.tipo}</td>
-                    <td
-                      className={`border px-4 py-2 ${
-                        vencida ? "text-red-600 font-semibold" : ""
-                      }`}
-                    >
-                      {linha.vencimento.toLocaleDateString("pt-BR")}
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
+      <div className="flex flex-col lg:flex-row gap-4 flex-1 overflow-hidden">
+        <TabelaCertidoes certidoes={certidoes} />
+        <CalendarioAgenda />
       </div>
     </div>
   );

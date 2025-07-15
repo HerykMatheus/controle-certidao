@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ficha de Fiscalização - Dispensa</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      padding: 20px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    td, th {
+      border: 1px solid #000;
+      padding: 6px;
+      vertical-align: top;
+    }
+    .titulo {
+      text-align: center;
+      font-size: 14px;
+      font-weight: bold;
+      margin: 12px 0;
+    }
+    .subtitulo {
+      text-align: center;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .assinaturas {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 40px;
+    }
+    .assinaturas div {
+      text-align: center;
+      width: 45%;
+    }
+    input[type="text"],
+    input[type="date"],
+    textarea {
+      width: 100%;
+      border: none;
+      background: transparent;
+      font-family: inherit;
+      font-size: inherit;
+      resize: none;
+    }
+    textarea {
+      height: 60px;
+    }
+  </style>
+</head>
+<body>
+  <div class="titulo">Ficha de Fiscalização de Contrato</div>
+  <div class="subtitulo">Art. 117, Lei nº 14.133/2021</div>
+
+  <table>
+    <tr>
+      <td style="width: 50%">Processo nº<br><span id="processo"></span></td>
+      <td>Modalidade:<br><span id="modalidade"></span></td>
+    </tr>
+    <tr>
+      <td>Fiscal Responsável:<br><span id="fiscal"></span></td>
+      <td>Nome:<br><input type="text" /></td>
+    </tr>
+    <tr>
+      <td>Ato de Designação<br>Portaria nº<br><span id="portaria"></span></td>
+      <td>Dispensável conforme no artigo 95, da Lei nº 14.133/21</td>
+    </tr>
+    <tr>
+      <td colspan="2">CONTRATO/REGISTRO</td>
+    </tr>
+    <tr>
+      <td>Contratado [a] - Empresa:<br><span id="fornecedor"></span></td>
+      <td>Responsável pelo[a] Contratada[o]:<br><input type="text" /></td>
+    </tr>
+    <tr>
+      <td>Ordem de Fornecimento ou de Início dos Serviços (Pedido):<br><span id="pedido"></span></td>
+      <td>Prazo de Execução:<br><input type="text" /></td>
+    </tr>
+    <tr>
+      <td colspan="2">Anotações da Fiscalização:<br><textarea></textarea></td>
+    </tr>
+    <tr>
+      <td colspan="2">Datas e Horários da Fiscalização/Conferência:<br><textarea></textarea></td>
+    </tr>
+    <tr>
+      <td>Recebimento Provisório<br>Data:<br><input type="date" /></td>
+      <td>Recebimento Definitivo<br>Data:<br><input type="date" /></td>
+    </tr>
+  </table>
+
+  <div class="assinaturas">
+    <div>
+      Gestor<br>
+      Nome Completo:<br>
+      <span id="gestor"></span>
+    </div>
+    <div>
+      Fiscal<br>
+      Nome Completo:<br>
+      <span id="fiscal_nome"></span>
+    </div>
+  </div>
+
+  <script>
+    const dados = JSON.parse(localStorage.getItem("dadosFicha"));
+    if (dados) {
+      document.getElementById("processo").innerText = dados.processo || "";
+      document.getElementById("modalidade").innerText = dados.modalidade || "";
+      document.getElementById("fornecedor").innerText = dados.fornecedor || "";
+      document.getElementById("pedido").innerText = dados.pedido || "";
+      document.getElementById("portaria").innerText = dados.portaria || "";
+
+      let fiscal = "";
+      let gestor = "";
+      if (Array.isArray(dados.fiscais)) {
+        const fg = dados.fiscais.find(fg => fg.local?.trim().toLowerCase() === dados.localEntrega?.trim().toLowerCase())
+                  || dados.fiscais.find(fg => fg.local?.trim().toLowerCase() === "todos");
+        fiscal = fg?.fiscal || "";
+        gestor = fg?.gestor || "";
+      }
+      document.getElementById("fiscal").innerText = fiscal;
+      document.getElementById("fiscal_nome").innerText = fiscal;
+      document.getElementById("gestor").innerText = gestor;
+    }
+  </script>
+</body>
+</html>

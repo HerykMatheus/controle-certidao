@@ -1,25 +1,31 @@
 // src/components/Sidebar.js
 import React from "react";
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 const Sidebar = () => (
-  <div style={{
-    width: "100px",
-    height: "50vh",
-    background: "#282c34",
-    color: "#fff",
-    padding: "15px",
-    position: "fixed"
-  }}>
-
-    <nav>
-      <ul style={{ listStyle: "none", padding: 0 }}>
-        <li><Link to="/" style={{ color: "#fff" }}>Home</Link></li>
-        <li><Link to="/cadastro" style={{ color: "#fff" }}>Cadastrar Fornecedor</Link></li>
-        <li><Link to="/certidao" style={{ color: "#fff" }}>Cadastrar Certidão</Link></li>
-        <li><Link to="/certidoes" style={{ color: "#fff" }}>Notas</Link></li>
-        <li><Link to="/checklist" style={{ color: "#fff" }}>Check List</Link></li>
-      </ul>
+  <div className="w-54 bg-[#1e293b] text-white min-h-screen p-6 shadow-lg">
+    <h1 className="text-xl font-bold mb-5">📋 Controle</h1>
+    <nav className="flex flex-col gap-3">
+      {[
+        { to: "/", label: "Início" },
+        { to: "/fornecedor", label: "Fornecedores" },
+        { to: "/certidao", label: "Certidão" },
+        { to: "/certidoes", label: "Notas" },
+        { to: "/checklist", label: "Check List" },
+        { to: "/ficha-fiscalizacao", label: "Ficha de Fiscalização" },
+      ].map((link) => (
+        <NavLink
+          key={link.to}
+          to={link.to}
+          className={({ isActive }) =>
+            `px-3 py-2 rounded hover:bg-[#334155] transition ${
+              isActive ? "bg-[#334155]" : ""
+            }`
+          }
+        >
+          {link.label}
+        </NavLink>
+      ))}
     </nav>
   </div>
 );

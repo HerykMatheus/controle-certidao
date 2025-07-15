@@ -2,3 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+.no-break {
+  page-break-inside: avoid !important;
+  break-inside: avoid !important;
+}

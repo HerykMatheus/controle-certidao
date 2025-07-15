@@ -1,6 +1,7 @@
 use serde::{Serialize, Deserialize};
-use crate::db::obter_client;
-use mongodb::Collection;
+use crate::app_state::AppState;
+use tauri::State;
+use mongodb::{Collection};
 use chrono::{Utc, NaiveDate, Datelike, TimeZone};
 use bson::{doc, DateTime as BsonDateTime};
 use futures::TryStreamExt;
@@ -49,16 +50,13 @@ fn naive_to_bson_date(date: Option<NaiveDate>) -> Option<BsonDateTime> {
 }
 
 #[tauri::command]
-pub async fn salvar_nota(nota: NotaRegistroInput) -> Result<String, String> {
-    let client = obter_client().await.map_err(|e| e.to_string())?;
-    let collection: Collection<NotaRegistro> = client
-        .database("Controle_certidao")
-        .collection("Notas");
+pub async fn salvar_nota(nota: NotaRegistroInput, state: State<'_, AppState>) -> Result<String, String> {
+    let collection: Collection<NotaRegistro> = state.db.collection("Notas");
 
     let nota_salva = NotaRegistro {
         _id: None,
         fornecedor: nota.fornecedor,
-        setor: nota.setor, // <-- Adicionado para suportar filtro por setor
+        setor: nota.setor,
         pedido: nota.pedido,
         parcial: nota.parcial.unwrap_or(0),
         nf: nota.nf.unwrap_or(0),
@@ -70,8 +68,7 @@ pub async fn salvar_nota(nota: NotaRegistroInput) -> Result<String, String> {
         origem: nota.origem,
     };
 
-    collection
-        .insert_one(nota_salva)
+    collection.insert_one(nota_salva)
         .await
         .map_err(|e| format!("Erro ao salvar nota: {}", e))?;
 
@@ -79,20 +76,16 @@ pub async fn salvar_nota(nota: NotaRegistroInput) -> Result<String, String> {
 }
 
 #[tauri::command]
-pub async fn editar_nota(id: String, nova_nota: NotaRegistroInput) -> Result<String, String> {
-    use mongodb::bson::oid::ObjectId;
+pub async fn editar_nota(id: String, nova_nota: NotaRegistroInput, state: State<'_, AppState>) -> Result<String, String> {
+    use bson::oid::ObjectId;
 
-    let client = obter_client().await.map_err(|e| e.to_string())?;
-    let collection: Collection<NotaRegistro> = client
-        .database("Controle_certidao")
-        .collection("Notas");
-
+    let collection: Collection<NotaRegistro> = state.db.collection("Notas");
     let obj_id = ObjectId::parse_str(&id).map_err(|e| e.to_string())?;
 
     let atualizacao = doc! {
         "$set": {
             "fornecedor": nova_nota.fornecedor,
-            "setor": nova_nota.setor, // <-- Adicionado para suportar filtro por setor
+            "setor": nova_nota.setor,
             "pedido": nova_nota.pedido,
             "parcial": nova_nota.parcial.unwrap_or(0),
             "nf": nova_nota.nf.unwrap_or(0),
@@ -105,8 +98,7 @@ pub async fn editar_nota(id: String, nova_nota: NotaRegistroInput) -> Result<Str
         }
     };
 
-    collection
-        .update_one(doc! { "_id": obj_id }, atualizacao)
+    collection.update_one(doc! { "_id": obj_id }, atualizacao)
         .await
         .map_err(|e| format!("Erro ao editar nota: {}", e))?;
 
@@ -114,18 +106,13 @@ pub async fn editar_nota(id: String, nova_nota: NotaRegistroInput) -> Result<Str
 }
 
 #[tauri::command]
-pub async fn excluir_nota(id: String) -> Result<String, String> {
-    use mongodb::bson::oid::ObjectId;
+pub async fn excluir_nota(id: String, state: State<'_, AppState>) -> Result<String, String> {
+    use bson::oid::ObjectId;
 
-    let client = obter_client().await.map_err(|e| e.to_string())?;
-    let collection: Collection<NotaRegistro> = client
-        .database("Controle_certidao")
-        .collection("Notas");
-
+    let collection: Collection<NotaRegistro> = state.db.collection("Notas");
     let obj_id = ObjectId::parse_str(&id).map_err(|e| e.to_string())?;
 
-    collection
-        .delete_one(doc! { "_id": obj_id })
+    collection.delete_one(doc! { "_id": obj_id })
         .await
         .map_err(|e| format!("Erro ao excluir nota: {}", e))?;
 
@@ -137,22 +124,15 @@ pub async fn filtrar_notas(
     origem: String,
     data: Option<String>,
     tipo_ficha: Option<String>,
+    state: State<'_, AppState>
 ) -> Result<Vec<NotaRegistro>, String> {
-    let client = obter_client().await.map_err(|e| e.to_string())?;
-    let collection: Collection<NotaRegistro> = client
-        .database("Controle_certidao")
-        .collection("Notas");
+    let collection: Collection<NotaRegistro> = state.db.collection("Notas");
 
-    let mut filtro = doc! {
-        "origem": &origem
-    };
+    let mut filtro = doc! { "origem": &origem };
 
     if let Some(data_str) = data {
         if let Ok(naive_date) = NaiveDate::parse_from_str(&data_str, "%Y-%m-%d") {
-            let chrono_dt = chrono::Local
-                .with_ymd_and_hms(naive_date.year(), naive_date.month(), naive_date.day(), 0, 0, 0)
-                .unwrap()
-                .with_timezone(&Utc);
+            let chrono_dt = chrono::Local.with_ymd_and_hms(naive_date.year(), naive_date.month(), naive_date.day(), 0, 0, 0).unwrap().with_timezone(&Utc);
             let bson_date = BsonDateTime::from_chrono(chrono_dt);
 
             if origem == "almoxarifado" {
@@ -171,13 +151,11 @@ pub async fn filtrar_notas(
         }
     }
 
-    let cursor = collection
-        .find(filtro)
+    let cursor = collection.find(filtro)
         .await
         .map_err(|e| format!("Erro ao buscar notas: {}", e))?;
 
-    let results: Vec<NotaRegistro> = cursor
-        .try_collect()
+    let results: Vec<NotaRegistro> = cursor.try_collect()
         .await
         .map_err(|e| format!("Erro ao coletar notas: {}", e))?;
 

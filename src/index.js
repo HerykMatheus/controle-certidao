@@ -10,6 +10,7 @@ import CadastroCertidao from "./pages/CadastroCertidao"; // Import para a págin
 import CadastroNotas from "./pages/CadastroNotas"; // Import para a página de notas
 import CheckList from "./pages/Checklist"; // Import para a página de check list
 import BuscaCertidoes from "./pages/BuscaCertidoes";  
+import FichaFiscalizacao from "./pages/FichaFiscalizacao"; // Import para a página de ficha de fiscalização
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -22,6 +23,7 @@ root.render(
         <Route path="certidoes" element={<CadastroNotas />} /> {/* Rota para a página de notas */}  
         <Route path="checklist" element={<CheckList />} /> {/* Rota para a página de check list */}
        <Route path="busca-certidoes" element={<BuscaCertidoes />} />
+        <Route path="ficha-fiscalizacao" element={<FichaFiscalizacao />} /> {/* Rota para a página de ficha de fiscalização */}
      </Route>
     </Routes>
   </BrowserRouter>

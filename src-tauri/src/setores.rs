@@ -1,6 +1,7 @@
-use mongodb::{bson::doc, options::FindOptions};
+use mongodb::{bson::doc, options::FindOptions, Collection};
 use serde::{Deserialize, Serialize};
-use crate::db::obter_client;
+use tauri::State;
+use crate::app_state::AppState;
 use futures::stream::TryStreamExt;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -9,19 +10,21 @@ pub struct Setor {
 }
 
 #[tauri::command]
-pub async fn buscar_setores_parcial(nome_parcial: String) -> Result<Vec<Setor>, String> {
-    let client = obter_client().await.map_err(|e| e.to_string())?;
-    let collection = client.database("Controle_certidao").collection::<Setor>("Setor");
+pub async fn buscar_setores_parcial(
+    nome_parcial: String,
+    state: State<'_, AppState>
+) -> Result<Vec<Setor>, String> {
+    let collection: Collection<Setor> = state.db.collection("Setor");
 
     let filtro = doc! {
         "nome": {
             "$regex": nome_parcial,
-            "$options": "i"  // busca case-insensitive
+            "$options": "i"
         }
     };
 
     let opcoes = FindOptions::builder()
-        .limit(10) // limita para no máximo 10 sugestões
+        .limit(10)
         .build();
 
     let mut cursor = collection.find(filtro)
